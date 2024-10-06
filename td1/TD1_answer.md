@@ -163,7 +163,7 @@ public class Counter {
 ```
 
 #### c)
-One generated concurrent history is stored in `history_counter.txt`.
+One generated concurrent history is stored in `history_counter.pdf`.
 
 ## Question5
 
@@ -228,14 +228,14 @@ Executing this program can yield $\{ 0, 1 \}$ or $\{ 0, 3 \}$ or $\{ 2, 3 \}$ in
 Executing this program prints a size less than $4$.
 
 #### b)
-One generated concurrent history is stored in `history_unlocked_set.txt`.
+One generated concurrent history is stored in `history_unlocked_set.pdf`.
 
 ## Question6
 
 We lock lock at the begining of methods $add$ and $rmv$, and unlock the lock at the end of these two methods.
 
 #### a)
-One generated concurrent history is stored in `history_locked_set.txt`. We put $4$ operation in order to simplify the history.
+One generated concurrent history is stored in `history_locked_set.pdf`. We put $4$ operation in order to simplify the history.
 
 ```
 t2: call@0 t2: call@2 t2: call@3 t2: call@4 
