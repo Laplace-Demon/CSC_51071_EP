@@ -39,7 +39,7 @@ The code for deleting a code is as following:
     }
 ```
 
-A thread which attempt to delete a node forever is a thread which `validate()` never succeeds.
+A thread which attempts to delete a node forever is a thread whose `validate()` method never succeeds.
 
 If in each loop, after the thread has found a node with key greater or equal than the searched key and before the thread locks the two locks (see the position of the comment), a thread deletes and readds the nodes which make `validate()` fail, then the thread is forever attempting to delete a node.
 
@@ -85,11 +85,23 @@ The set data type using linked lists with lazy synchronization is implemented in
 
 #### a)
 
-The algorithm remains linearizable if we mark a node as removed simply by setting its next field to $null$. However, it's simply because we can no longer have terminating `add()` and `remove()` operations on an empty set.
+The algorithm remains linearizable if we mark a node as removed simply by setting its next field to $null$. However, it's simply because the initial state is empty set and we can no longer have terminating `add()` and `remove()` operations on an empty set.
 
 It is because we are unable to distinguish between a logically deleted node and the last node in the list. Especially, when we try to perform `add()` and `remove()` on an empty list, the method `validate()` will fail.
 
-`ex4a.java` shows such scenario. Checking for $null$ fields during list traversal is not implemented because it's not useful for demonstration purpose.
+`ex4a1.java` shows such scenario. Checking for $null$ fields during list traversal is not implemented because it's not useful for demonstration purpose.
+
+If in the definition of set, the initial state is not an empty set, then the implementation is not linearizable. It is because the method `contains()` may not observe the desired value if the list is temporarily truncated by `remove()`.
+
+Below shows a counterexample generated using `ex4a2.java`, the set has initial state $\{ 1, 2, 3 \}$.
+
+```
+t1: call@1 contains(3)
+t1: rtn@2 contains(3, false)
+
+t2: call@0 remove(2)
+t2: rtn@3 remove(2, true)
+```
 
 #### b)
 

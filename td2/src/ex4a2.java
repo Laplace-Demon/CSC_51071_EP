@@ -1,45 +1,19 @@
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ex4a {
+public class ex4a2 {
     private LazyNode content = null;
     
     AtomicInteger time = new AtomicInteger(0);
     
-    public ex4a () {
-        this.content = new LazyNode(Integer.MIN_VALUE, new LazyNode(Integer.MAX_VALUE));
+    public ex4a2 () {
+        this.content = new LazyNode(Integer.MIN_VALUE, new LazyNode(1, new LazyNode(2, new LazyNode(3, new LazyNode(Integer.MAX_VALUE)))));
     }
     
     public boolean validate(LazyNode prev, LazyNode curr) {
         return prev.next != null && curr.next != null && prev.next == curr;
     }
     
-    public boolean add (int key) {
-        while (true) {
-            LazyNode prev, curr;
-            prev = this.content;
-            curr = prev.next;
-            
-            while (curr.key < key) {
-                prev = prev.next;
-                curr = curr.next;
-            }
-            prev.lock.lock();
-            curr.lock.lock();
-            
-            try {
-                if (validate(prev, curr)) {
-                    if (key == curr.key) return false;
-                    prev.next = new LazyNode(key, curr);
-                    return true;
-                }
-            } finally {
-                prev.lock.unlock();
-                curr.lock.unlock();
-            }
-        }
-    }
-    
-    public boolean remove (int key) {
+    public boolean remove (int key) throws InterruptedException {
         while (true) {
             LazyNode prev, curr;
             prev = this.content;
@@ -57,6 +31,7 @@ public class ex4a {
                     if (key == curr.key) {
                         LazyNode temp = curr.next;
                         curr.next = null;
+                        Thread.sleep(1000);
                         prev.next = temp;
                         return true;
                     }
@@ -72,8 +47,8 @@ public class ex4a {
     public boolean contains (int key) {
         LazyNode curr;
         curr = this.content;
-        while (key > curr.key) curr = curr.next;
-        return !curr.tag && key == curr.key;
+        while (curr != null && key > curr.key) curr = curr.next;
+        return curr != null && curr.next != null && key == curr.key;
     }
     
     public int size() {
@@ -87,20 +62,36 @@ public class ex4a {
     }
     
     public static void main(String[] args) throws Exception {
-        ex4a s = new ex4a();
+        ex4a2 s = new ex4a2();
         
         Thread t1 = new Thread(() -> {
             boolean result;
             String log = new String("");
             
-            log += "t1: call@" + s.time.getAndIncrement() + " add(1)\n";
-            result = s.add(1);
-            log += "t1: rtn@" + s.time.getAndIncrement() + " add(1, " + result + ")\n";
+            log += "t1: call@" + s.time.getAndIncrement() + " contains(3)\n";
+            result = s.contains(3);
+            log += "t1: rtn@" + s.time.getAndIncrement() + " contains(3, " + result + ")\n";
+            
+            System.out.println(log);
+        });
+        
+        Thread t2 = new Thread(() -> {
+            boolean result = true;
+            String log = new String("");
+            
+            log += "t2: call@" + s.time.getAndIncrement() + " remove(2)\n";
+            try {
+                result = s.remove(2);
+            } catch (InterruptedException e) {
+            }
+            log += "t2: rtn@" + s.time.getAndIncrement() + " remove(2, " + result + ")\n";
             
             System.out.println(log);
         });
         
         t1.start();
+        t2.start();
         t1.join();
+        t2.join();
     }
 }
